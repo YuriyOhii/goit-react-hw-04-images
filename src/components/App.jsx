@@ -15,17 +15,21 @@ export const App = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [totalHits, setTotalHits] = useState(0);
 
-  useEffect(()=>{
+  useEffect(() => {
     const didUpdate = async () => {
-      if(query === "") return;
+      if (query === '') return;
       try {
         setIsLoading(true);
         setError(null);
-        const {hits, totalHits} = await getGalleryImages({ per_page, query, page });
+        const { hits, totalHits } = await getGalleryImages({
+          per_page,
+          query,
+          page,
+        });
         setTotalHits(totalHits);
-        setImages(prevImages=>[...prevImages, ...hits]);
+        setImages(prevImages => [...prevImages, ...hits]);
       } catch (error) {
-        setError(error)
+        setError(error);
       } finally {
         setIsLoading(false);
       }
@@ -40,7 +44,7 @@ export const App = () => {
   };
 
   const changePage = () => {
-    setPage(prevPage=>prevPage + 1)
+    setPage(prevPage => prevPage + 1);
   };
 
   const showBtnLoadMore = Math.ceil(totalHits / per_page) > page;
@@ -52,7 +56,9 @@ export const App = () => {
       {images.length > 0 && <ImageGallery images={images} />}
 
       {isLoading && <Loader />}
-      {showBtnLoadMore > 0 && images.length > 0 && <Button onClick={changePage} />}
+      {showBtnLoadMore > 0 && images.length > 0 && (
+        <Button onClick={changePage} />
+      )}
     </Layout>
   );
-}
+};
