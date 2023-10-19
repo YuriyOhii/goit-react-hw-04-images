@@ -1,39 +1,33 @@
-import React, { PureComponent } from 'react';
+import { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Overlay, ModalW } from './Modal.styled';
-export class Modal extends PureComponent {
-
-  static propTypes = {
-    bigImage: PropTypes.string.isRequired,
-    tag: PropTypes.string.isRequired,
-    onClick: PropTypes.func.isRequired,
+export const Modal = ({ bigImage, tag, onClick }) => {
+  const onEscClose = e => {
+    if (e.code === 'Escape') onClick();
   };
 
-  componentDidMount() {
-    window.addEventListener('keydown', this.onEscClose);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.onEscClose);
-  }
-
-  onEscClose = e => {
-    if (e.code === 'Escape') this.props.onClick();
+  const handleClick = e => {
+    if (e.target === e.currentTarget) onClick();
   };
 
-  handleClick = e => {
-    if (e.target === e.currentTarget) this.props.onClick();
-  };
-  render()  {
-    const { bigImage, tag } = this.props
+  useEffect(() => {
+    window.addEventListener('keydown', onEscClose);
+    return () => {
+      window.removeEventListener('keydown', onEscClose);
+    };
+  });
+
   return (
-    <Overlay onClick={this.handleClick}>
+    <Overlay onClick={handleClick}>
       <ModalW>
         <img src={bigImage} alt={tag} />
       </ModalW>
     </Overlay>
   );
-}
-}
+};
 
- 
+Modal.propTypes = {
+  bigImage: PropTypes.string.isRequired,
+  tag: PropTypes.string.isRequired,
+  onClick: PropTypes.func.isRequired,
+};
