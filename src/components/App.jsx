@@ -1,4 +1,4 @@
-import { PureComponent } from 'react';
+import { useState, useEffect } from 'react';
 import { Searchbar } from './Searchbar';
 import { ImageGallery } from './ImageGallery';
 import { Loader } from './Loader';
@@ -6,52 +6,53 @@ import { Button } from './Button';
 import { Layout } from './Layout';
 import { getGalleryImages } from '../api/services';
 
-export class App extends PureComponent {
-  state = {
-    per_page: 12,
-    page: 1,
-    query: '',
-    images: [],
-    error: null,
-    isLoading: false,
-    totalHits: 0,
-  };
+export const App = () => {
+  const [per_page, setPer_page] = useState(12);
+  const [page, setPage] = useState(1);
+  const [query, setQuery] = useState('');
+  const [images, setImages] = useState([]);
+  const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [totalHits, setTotalHits] = useState(0);
 
-  async componentDidUpdate(prevProps, prevState) {
-    const { per_page, query, page } = this.state;
-    if (prevState.query !== query || prevState.page !== page) {
+  useEffect(()=>{
+    const didUpdate = async () => {
+      if(query === "") return;
       try {
-        this.setState(() => ({ isLoading: true, error: null }));
+        setIsLoading(true);
+        setError(null);
         const {hits, totalHits} = await getGalleryImages({ per_page, query, page });
-        this.setState(state => ({ images: [...state.images, ...hits], totalHits }));
+        setTotalHits(totalHits);
+        setImages(prevImages=>[...prevImages, ...hits]);
       } catch (error) {
-        this.setState({ error });
+        setError(error)
       } finally {
-        this.setState({ isLoading: false });
+        setIsLoading(false);
       }
-    }
-  }
+    };
+    didUpdate();
+  }, [query, page, per_page]);
 
-  getQuery = query => {
-    this.setState({ query, images: [], page: 1  });
+  const getQuery = query => {
+    setPage(1);
+    setQuery(query);
+    setImages([]);
   };
 
-  changePage = () => {
-    this.setState(state => ({ page: state.page + 1 }));
+  const changePage = () => {
+    setPage(prevPage=>prevPage + 1)
   };
 
-  render() {
-    const { images, isLoading, error, totalHits, per_page, page} = this.state;
-    const showBtnLoadMore = Math.ceil(totalHits / per_page) > page
-    return (
-      <Layout>
-        <Searchbar onSubmit={this.getQuery} />
-        {error && <b>Something went wrong! Try to reload the page!</b>}
-        {images.length > 0 && <ImageGallery images={images} />}
+  const showBtnLoadMore = Math.ceil(totalHits / per_page) > page;
 
-        {isLoading && <Loader />}
-        {showBtnLoadMore > 0 && images.length > 0 && <Button onClick={this.changePage} />}
-      </Layout>
-    );
-  }
+  return (
+    <Layout>
+      <Searchbar onSubmit={getQuery} />
+      {error && <b>Something went wrong! Try to reload the page!</b>}
+      {images.length > 0 && <ImageGallery images={images} />}
+
+      {isLoading && <Loader />}
+      {showBtnLoadMore > 0 && images.length > 0 && <Button onClick={changePage} />}
+    </Layout>
+  );
 }
