@@ -7,7 +7,8 @@ import { Layout } from './Layout';
 import { getGalleryImages } from '../api/services';
 
 export const App = () => {
-  const [per_page, setPer_page] = useState(12);
+
+  const per_page = 12;
   const [page, setPage] = useState(1);
   const [query, setQuery] = useState('');
   const [images, setImages] = useState([]);
